@@ -18,19 +18,19 @@ A full-stack web application featuring an AI assistant that answers questions gr
 ## Screenshots
 
 <div align="center">
-  <img src="docs/images/landing.png" alt="Landing Page" width="800"/>
+  <img src="docs/images/land2.jpeg" alt="Landing Page" width="800"/>
   <p><em>Premium Landing Page with 3D floating visual</em></p>
   <br/>
-  <img src="docs/images/chat.png" alt="Workspace Chat" width="800"/>
+  <img src="docs/images/dash1.jpeg" alt="Workspace Chat" width="800"/>
   <p><em>RAG Chat Interface with source citations</em></p>
   <br/>
-  <img src="docs/images/documents.png" alt="Document Upload" width="800"/>
+  <img src="docs/images/dash2.jpeg" alt="Document Upload" width="800"/>
   <p><em>Workspace Document Management</em></p>
   <br/>
-  <img src="docs/images/tasks.png" alt="Tasks Dashboard" width="800"/>
+  <img src="docs/images/dash3.jpeg" alt="Tasks Dashboard" width="800"/>
   <p><em>AI-Generated Task List</em></p>
   <br/>
-  <img src="docs/images/logs.png" alt="Tool Logs" width="800"/>
+  <img src="docs/images/dash4.jpeg" alt="Tool Logs" width="800"/>
   <p><em>Tool Call Logging and Auditing</em></p>
 </div>
 
