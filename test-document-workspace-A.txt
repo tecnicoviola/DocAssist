@@ -1,0 +1,206 @@
+DocAssist Test Document — Frontend Developer Knowledge Base
+============================================================
+
+SECTION 1: HTML FUNDAMENTALS
+==============================
+
+HTML (HyperText Markup Language) is the standard markup language for creating web pages.
+It describes the structure of a web page using elements represented by tags.
+
+Key HTML concepts:
+- DOCTYPE declaration: Tells the browser which version of HTML the page uses
+- Semantic elements: <header>, <nav>, <main>, <section>, <article>, <footer>
+- Forms: <form>, <input>, <textarea>, <select>, <button>
+- Media: <img>, <video>, <audio>, <canvas>, <svg>
+
+Important HTML5 features:
+1. Local Storage and Session Storage
+2. Canvas and WebGL for graphics
+3. Web Workers for background processing
+4. Geolocation API
+5. Drag and Drop API
+6. Offline support via Service Workers
+
+
+SECTION 2: CSS FUNDAMENTALS
+============================
+
+CSS (Cascading Style Sheets) is used to describe the presentation of HTML documents.
+
+Box Model:
+The CSS box model consists of: content, padding, border, margin.
+- content: The actual content of the element
+- padding: Space inside the element, between content and border
+- border: A line surrounding the padding
+- margin: Space outside the border, between elements
+
+Flexbox:
+Flexbox is a layout model that provides a more efficient way to lay out items.
+- display: flex — activates flexbox on a container
+- flex-direction: row | column
+- justify-content: flex-start | center | flex-end | space-between | space-around
+- align-items: stretch | flex-start | center | flex-end
+
+CSS Grid:
+Grid is a powerful layout system that creates two-dimensional layouts.
+- display: grid
+- grid-template-columns: defines column structure
+- grid-template-rows: defines row structure
+- gap: shorthand for row-gap and column-gap
+
+CSS Variables (Custom Properties):
+:root {
+  --primary-color: #6c63ff;
+  --text-color: #333;
+  --font-size-base: 16px;
+}
+
+CSS Animations:
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+SECTION 3: JAVASCRIPT FUNDAMENTALS
+=====================================
+
+JavaScript is a lightweight, interpreted programming language with first-class functions.
+
+Data Types:
+- Primitive: string, number, bigint, boolean, undefined, symbol, null
+- Reference: object, array, function
+
+ES6+ Features:
+1. Arrow functions: const add = (a, b) => a + b;
+2. Destructuring: const { name, age } = person;
+3. Spread operator: const newArr = [...arr1, ...arr2];
+4. Template literals: `Hello, ${name}!`
+5. Async/Await: async function fetchData() { const data = await fetch(url); }
+6. Modules: import / export syntax
+7. Optional chaining: user?.profile?.avatar
+8. Nullish coalescing: value ?? defaultValue
+
+Promises:
+A Promise is an object representing the eventual completion or failure of an async operation.
+States: pending, fulfilled, rejected
+
+fetch('https://api.example.com/data')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error(error));
+
+
+SECTION 4: REACT FUNDAMENTALS
+================================
+
+React is a JavaScript library for building user interfaces, developed by Facebook.
+
+Core Concepts:
+1. Components — Reusable UI building blocks (functional or class-based)
+2. JSX — JavaScript syntax extension for writing HTML-like code
+3. Props — Read-only data passed from parent to child components
+4. State — Mutable data managed within a component
+5. Hooks — Functions that let you use state and lifecycle features in functional components
+
+Important Hooks:
+- useState: Manages local component state
+- useEffect: Runs side effects (data fetching, subscriptions)
+- useContext: Accesses React context without nesting
+- useRef: Persists mutable values without causing re-renders
+- useMemo: Memoizes expensive computations
+- useCallback: Memoizes functions to prevent unnecessary re-renders
+
+Component Lifecycle (via useEffect):
+- componentDidMount equivalent: useEffect(() => {}, [])
+- componentDidUpdate equivalent: useEffect(() => {}, [dependency])
+- componentWillUnmount equivalent: useEffect(() => { return () => cleanup(); }, [])
+
+React Router:
+Used for client-side routing in React applications.
+- <BrowserRouter> — wraps the entire app
+- <Routes> and <Route> — define URL paths to components
+- useNavigate() — programmatic navigation
+- useParams() — access URL parameters
+
+
+SECTION 5: INTERVIEW QUESTIONS
+================================
+
+Q1: What is the difference between let, const, and var?
+A: var is function-scoped and hoisted. let and const are block-scoped.
+   const cannot be reassigned after declaration but its properties can be mutated.
+
+Q2: What is closure in JavaScript?
+A: A closure is a function that has access to variables from its outer scope
+   even after the outer function has returned. This is possible because JavaScript
+   maintains a reference to the outer environment.
+
+Q3: What is the Virtual DOM in React?
+A: The Virtual DOM is an in-memory representation of the real DOM.
+   React compares the Virtual DOM with the previous version (diffing) and
+   only updates the actual DOM where changes occurred (reconciliation).
+   This makes React updates very efficient.
+
+Q4: What is the difference between == and === in JavaScript?
+A: == performs type coercion before comparison (loose equality).
+   === checks both value and type without coercion (strict equality).
+   Example: 0 == false is true, but 0 === false is false.
+
+Q5: Explain event bubbling and event capturing.
+A: Event bubbling: Events propagate from the target element up to the root.
+   Event capturing: Events propagate from the root down to the target element.
+   By default, event handlers are in the bubbling phase.
+   Use event.stopPropagation() to prevent bubbling.
+
+Q6: What is CORS?
+A: Cross-Origin Resource Sharing (CORS) is a security mechanism that allows
+   or restricts web applications running at one origin to make requests to
+   a different origin. It is enforced by the browser, not the server.
+
+Q7: What are Web Workers?
+A: Web Workers allow JavaScript to run scripts in background threads,
+   separate from the main execution thread. This prevents heavy computations
+   from blocking the UI and keeps the page responsive.
+
+Q8: What is the difference between localStorage and sessionStorage?
+A: Both store key-value pairs in the browser.
+   localStorage: Persists until explicitly cleared, shared across tabs.
+   sessionStorage: Cleared when the browser tab is closed, tab-specific.
+
+
+SECTION 6: PERFORMANCE OPTIMIZATION
+=====================================
+
+Frontend Performance Tips:
+1. Lazy loading — Load images and components only when needed
+2. Code splitting — Split JavaScript bundles for faster initial load
+3. Memoization — Cache expensive computation results (useMemo, React.memo)
+4. Debouncing — Delay execution of frequently called functions (e.g. search)
+5. Throttling — Limit function calls to a fixed rate (e.g. scroll events)
+6. Tree shaking — Remove unused code during bundling
+7. Image optimization — Use WebP format, proper sizing, and CDN delivery
+8. Minification — Reduce file sizes by removing whitespace and comments
+9. Caching — Use HTTP caching headers and Service Workers
+10. Critical CSS — Inline CSS needed for above-the-fold content
+
+Core Web Vitals (Google Performance Metrics):
+- LCP (Largest Contentful Paint): Should be under 2.5 seconds
+- FID (First Input Delay): Should be under 100 milliseconds
+- CLS (Cumulative Layout Shift): Should be under 0.1
+
+
+SECTION 7: UNIQUE FACTS FOR WORKSPACE ISOLATION TESTING
+=========================================================
+
+WORKSPACE A UNIQUE FACT:
+The DocAssist platform uses a HNSW (Hierarchical Navigable Small World) index
+for vector similarity search, which provides O(log n) query complexity and
+is significantly faster than IVFFlat for real-time retrieval use cases.
+
+WORKSPACE A SECRET:
+The magic number for this workspace is 42. If someone asks for the secret
+number of Workspace A, the answer is forty-two.
+
+This document was designed specifically for testing RAG retrieval and
+workspace isolation in the Multi-Workspace Document Assistant project.

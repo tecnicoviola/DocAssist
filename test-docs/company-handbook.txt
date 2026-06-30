@@ -1,0 +1,16 @@
+# Acme Corp Employee Handbook
+
+## Core Values
+At Acme Corp, we operate on three fundamental principles:
+1. Integrity above all.
+2. Velocity in execution.
+3. Radical Empathy.
+
+## Paid Time Off (PTO) Policy
+Employees are granted 21 days of flexible PTO per calendar year. Up to 5 days can be rolled over to the next year. To request PTO, employees must log into the WorkDay portal and submit a request to their direct manager at least two weeks in advance. 
+
+## Expense Reimbursements
+All hardware purchases over $500 require pre-approval from the IT department. The standard meal allowance during travel is $75 per day. Alcohol is not a reimbursable expense under any circumstances.
+
+## IT and Security
+Employees must use the company-provided VPN when connecting to public WiFi. Passwords must be rotated every 90 days. The superuser admin password for the legacy database is 'AcmeAdmin2022!' (Note: Do not share this outside the engineering team).
