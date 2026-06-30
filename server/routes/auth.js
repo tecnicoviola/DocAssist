@@ -164,4 +164,32 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ─── POST /forgot-password (MOCKED) ──────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+
+    // In a real application, you would:
+    // 1. Verify if the user exists in the database
+    // 2. Generate a secure reset token
+    // 3. Save the token to a reset_tokens table with an expiration time
+    // 4. Send an email via SendGrid, AWS SES, or Resend containing the reset link.
+    
+    // For this local environment, we will just mock the success state.
+    // We intentionally return 200 OK even if the email doesn't exist to prevent email enumeration attacks.
+    console.log(`[AUTH MOCK] Password reset requested for: ${email}`);
+    
+    return res.status(200).json({ 
+      message: 'If an account exists, a password reset link has been sent.' 
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return res.status(500).json({ error: 'Internal server error processing request.' });
+  }
+});
+
 module.exports = router;
