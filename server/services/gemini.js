@@ -15,7 +15,7 @@ function getGroq() {
   return _groq;
 }
 
-const MODEL = 'llama3-70b-8192';
+const MODEL = 'llama-3.1-8b-instant';
 
 
 /**
@@ -128,6 +128,19 @@ async function chat(userMessage, context, retrievedChunks, chatHistory) {
 
     const choice = response.choices[0];
     const message = choice.message;
+
+    // --- FIX FOR LLAMA 8B XML HALLUCINATION ---
+    if (message.content && (!message.tool_calls || message.tool_calls.length === 0)) {
+      const match = message.content.match(/<function=([^>]+)>(.*?)<\/function>/);
+      if (match) {
+        message.tool_calls = [{
+          id: 'call_fallback_' + Date.now(),
+          type: 'function',
+          function: { name: match[1].trim(), arguments: match[2] || '{}' }
+        }];
+        message.content = message.content.replace(match[0], '').trim();
+      }
+    }
 
     // If no tool calls, we have our final answer
     if (!message.tool_calls || message.tool_calls.length === 0) {
