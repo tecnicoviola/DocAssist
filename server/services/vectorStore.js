@@ -52,7 +52,7 @@ async function searchChunks(queryEmbedding, workspaceId, topK = 5, queryText = '
     const { data, error } = await supabase.rpc('match_chunks', {
       query_embedding: JSON.stringify(queryEmbedding),
       p_workspace_id: workspaceId,
-      match_threshold: 0.05,
+      match_threshold: 0.4,
       match_count: topK,
     });
 
