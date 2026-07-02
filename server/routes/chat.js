@@ -53,14 +53,14 @@ router.post('/', async (req, res) => {
     const retrievedChunks = await searchChunks(queryEmbedding, workspace_id, 3, message.trim());
 
 
-    // Step 3: Get recent chat history (last 4 messages) for conversational context
+    // Step 3: Get recent chat history (last 2 messages) for conversational context
     const { data: historyRows } = await supabase
       .from('chat_messages')
       .select('role, content')
       .eq('workspace_id', workspace_id)
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false })
-      .limit(4);
+      .limit(2);
 
     // Reverse so oldest is first (Gemini expects chronological order)
     const chatHistory = (historyRows || []).reverse();
