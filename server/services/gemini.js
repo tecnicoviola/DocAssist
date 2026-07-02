@@ -15,7 +15,7 @@ function getGroq() {
   return _groq;
 }
 
-const MODEL = 'mixtral-8x7b-32768';
+const MODEL = 'llama3-70b-8192';
 
 
 /**
