@@ -15,7 +15,7 @@ function getGroq() {
   return _groq;
 }
 
-const MODEL = 'llama3-groq-70b-8192-tool-use-preview';
+const MODEL = 'mixtral-8x7b-32768';
 
 
 /**
