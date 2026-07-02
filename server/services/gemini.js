@@ -1,22 +1,21 @@
 /**
- * Groq Chat Service
- * Handles RAG-based chat with tool calling using Groq's lightning-fast LLaMA models.
+ * Gemini Chat Service
+ * Handles RAG-based chat with tool calling using Google's Gemini models.
  */
 
-const Groq = require('groq-sdk');
+const { GoogleGenAI, Type } = require('@google/genai');
 const { TOOL_DEFINITIONS, executeTool } = require('./tools');
 
-let _groq = null;
-function getGroq() {
-  if (!process.env.GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY is not set. Get your free key at https://console.groq.com/keys and add it to your .env file.');
+let _ai = null;
+function getAI() {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not set. Please add it to your environment variables.');
   }
-  if (!_groq) _groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-  return _groq;
+  if (!_ai) _ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  return _ai;
 }
 
-const MODEL = 'llama3-groq-70b-8192-tool-use-preview';
-
+const MODEL = 'gemini-2.5-flash';
 
 /**
  * Build the system prompt for the document assistant.
@@ -36,30 +35,41 @@ Be concise, accurate, and helpful.`;
 }
 
 /**
- * Convert our tool definitions to Groq's function-calling format.
+ * Convert our tool definitions to Gemini's format.
  */
-function buildGroqTools() {
-  return TOOL_DEFINITIONS.map((tool) => ({
-    type: 'function',
-    function: {
+function buildGeminiTools() {
+  const typeMap = {
+    'string': Type.STRING,
+    'object': Type.OBJECT,
+    'array': Type.ARRAY,
+    'number': Type.NUMBER,
+    'boolean': Type.BOOLEAN
+  };
+
+  const functionDeclarations = TOOL_DEFINITIONS.map((tool) => {
+    const properties = {};
+    for (const [key, val] of Object.entries(tool.parameters.properties)) {
+      properties[key] = {
+        type: typeMap[val.type.toLowerCase()] || Type.STRING,
+        description: val.description,
+      };
+      if (val.enum) {
+        properties[key].enum = val.enum;
+      }
+    }
+
+    return {
       name: tool.name,
       description: tool.description,
       parameters: {
-        type: tool.parameters.type.toLowerCase(),
-        properties: Object.fromEntries(
-          Object.entries(tool.parameters.properties).map(([key, val]) => [
-            key,
-            {
-              type: val.type.toLowerCase(),
-              description: val.description,
-              ...(val.enum ? { enum: val.enum } : {}),
-            },
-          ])
-        ),
+        type: Type.OBJECT,
+        properties: properties,
         required: tool.parameters.required || [],
-      },
-    },
-  }));
+      }
+    };
+  });
+
+  return [{ functionDeclarations }];
 }
 
 /**
@@ -87,30 +97,29 @@ async function chat(userMessage, context, retrievedChunks, chatHistory) {
     contextBlock = '\n\n[No relevant document context found for this query]\n';
   }
 
-  // Build messages array
-  const messages = [
-    { role: 'system', content: buildSystemPrompt(context.workspaceName) },
-  ];
+  const systemInstruction = buildSystemPrompt(context.workspaceName);
 
-  // Add recent chat history
+  // Convert history to Gemini format (user, model)
+  const contents = [];
+  
   if (chatHistory && chatHistory.length > 0) {
     chatHistory.forEach((msg) => {
-      messages.push({
-        role: msg.role === 'assistant' ? 'assistant' : 'user',
-        content: msg.content,
+      contents.push({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
       });
     });
   }
 
-  // Add current user message with document context
-  messages.push({
+  // Add current user message with context
+  contents.push({
     role: 'user',
-    content: `${userMessage}${contextBlock}`,
+    parts: [{ text: `${userMessage}${contextBlock}` }],
   });
 
-  const tools = buildGroqTools();
+  const tools = buildGeminiTools();
 
-  // Tool calling loop (max 5 iterations)
+  // Tool calling loop
   const MAX_ITERATIONS = 5;
   let iteration = 0;
   let finalReply = '';
@@ -118,64 +127,54 @@ async function chat(userMessage, context, retrievedChunks, chatHistory) {
   while (iteration < MAX_ITERATIONS) {
     iteration++;
 
-    const response = await getGroq().chat.completions.create({
+    const response = await getAI().models.generateContent({
       model: MODEL,
-      messages,
-      tools,
-      tool_choice: 'auto',
-      max_tokens: 2048,
+      contents,
+      config: {
+        systemInstruction: systemInstruction,
+        tools: tools,
+      }
     });
 
-    const choice = response.choices[0];
-    const message = choice.message;
-
-    // --- FIX FOR LLAMA 8B XML HALLUCINATION ---
-    if (message.content && (!message.tool_calls || message.tool_calls.length === 0)) {
-      const match = message.content.match(/<function=([^>]+)>(.*?)<\/function>/);
-      if (match) {
-        message.tool_calls = [{
-          id: 'call_fallback_' + Date.now(),
-          type: 'function',
-          function: { name: match[1].trim(), arguments: match[2] || '{}' }
-        }];
-        message.content = message.content.replace(match[0], '').trim();
-      }
+    const responseText = response.text || '';
+    if (responseText) {
+      finalReply = responseText;
     }
 
-    // If no tool calls, we have our final answer
-    if (!message.tool_calls || message.tool_calls.length === 0) {
-      finalReply = message.content || '';
-      break;
-    }
-
-    // Add assistant message with tool calls to history
-    messages.push(message);
-
-    // Execute each tool call
-    for (const toolCall of message.tool_calls) {
-      const toolName = toolCall.function.name;
-      let args = {};
-
-      try {
-        args = JSON.parse(toolCall.function.arguments || '{}');
-      } catch {
-        args = {};
-      }
-
-      console.log(`[Tool Call] Executing: ${toolName}`, args);
-      const result = await executeTool(toolName, args, context);
-      toolCalls.push({ name: toolName, args, result });
-
-      // Add tool result to messages
-      messages.push({
-        role: 'tool',
-        tool_call_id: toolCall.id,
-        content: JSON.stringify(result),
+    // Check for function calls
+    if (response.functionCalls && response.functionCalls.length > 0) {
+      // Add the model's function calls to the history
+      contents.push({
+        role: 'model',
+        parts: response.functionCalls.map(fc => ({ functionCall: fc }))
       });
-    }
 
-    // If stop reason is not tool_calls, we're done
-    if (choice.finish_reason !== 'tool_calls') {
+      const toolResponses = [];
+
+      for (const call of response.functionCalls) {
+        const toolName = call.name;
+        const args = call.args || {};
+        
+        console.log(`[Tool Call] Executing: ${toolName}`, args);
+        const result = await executeTool(toolName, args, context);
+        toolCalls.push({ name: toolName, args, result });
+
+        toolResponses.push({
+          functionResponse: {
+            name: toolName,
+            response: result
+          }
+        });
+      }
+
+      // Add the function responses back to history
+      contents.push({
+        role: 'user',
+        parts: toolResponses
+      });
+      
+    } else {
+      // No tool calls, we have our final answer
       break;
     }
   }
